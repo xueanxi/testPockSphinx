@@ -87,10 +87,6 @@ public class MainActivity extends Activity implements
 
         // Recognizer initialization is a time-consuming and it involves IO,
         // so we execute it in async task
-
-
-
-
         new AsyncTask<Void, Void, Exception>() {
             @Override
             protected Exception doInBackground(Void... params) {
@@ -116,10 +112,59 @@ public class MainActivity extends Activity implements
                 } else {
                     recognizer.stop();
                     Log.e(TAG,"start record time is :"+sdf.format(new Date()));
-                    recognizer.startListening(FORECAST_SEARCH,30000);
+                    recognizer.startListening(KWS_SEARCH,30000);
+                    makeText("可以开始说了...");
                 }
             }
         }.execute();
+    }
+
+
+    private void setupRecognizer(File assetsDir) throws IOException {
+        // The recognizer can be configured to perform multiple searches
+        // of different kind and switch between them
+
+        recognizer = defaultSetup()
+                //.setAcousticModel(new File(assetsDir, "en-us-ptm"))
+                .setAcousticModel(new File(assetsDir, "zh"))
+                //.setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
+                .setDictionary(new File(assetsDir, "my.dict"))
+
+                // To disable logging of raw audio comment out this call (takes a lot of space on the device)
+                //.setRawLogDir(assetsDir)
+
+                // Threshold to tune for keyphrase to balance between false alarms and misses
+                .setKeywordThreshold(1e-6f)
+
+                // Use context-independent phonetic search, context-dependent is too slow for mobile
+                .setBoolean("-allphone_ci", true)
+
+                .getRecognizer();
+        recognizer.addListener(this);
+
+        /** In your application you might not need to add all those searches.
+         * They are added here for demonstration. You can leave just one.
+         */
+
+        // Create keyword-activation search.
+        //recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
+        recognizer.addKeywordSearch(KWS_SEARCH,new File(assetsDir,"book2.txt"));
+
+        // Create grammar-based search for selection between demos
+/*        File menuGrammar = new File(assetsDir, "menu.gram");
+        recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);*/
+
+        // Create grammar-based search for digit recognition
+        //File digitsGrammar = new File(assetsDir, "digits.gram");
+        //recognizer.addGrammarSearch(DIGITS_SEARCH, digitsGrammar);
+
+        // Create language model search
+        //File languageModel = new File(assetsDir, "weather.dmp");
+        //recognizer.addNgramSearch(FORECAST_SEARCH, languageModel);
+
+        // Phonetic search
+        //File phoneticModel = new File(assetsDir, "en-phone.dmp");
+        //recognizer.addAllphoneSearch(PHONE_SEARCH, phoneticModel);
     }
 
     @Override
@@ -186,50 +231,6 @@ public class MainActivity extends Activity implements
         Log.e(TAG,"onEndOfSpeech");
     }
 
-    private void setupRecognizer(File assetsDir) throws IOException {
-        // The recognizer can be configured to perform multiple searches
-        // of different kind and switch between them
-        
-        recognizer = defaultSetup()
-                .setAcousticModel(new File(assetsDir, "en-us-ptm"))
-                .setDictionary(new File(assetsDir, "newdict.dict"))
-                
-                // To disable logging of raw audio comment out this call (takes a lot of space on the device)
-                //.setRawLogDir(assetsDir)
-                
-                // Threshold to tune for keyphrase to balance between false alarms and misses
-                .setKeywordThreshold(1e-3f)
-                
-                // Use context-independent phonetic search, context-dependent is too slow for mobile
-                .setBoolean("-allphone_ci", true)
-                
-                .getRecognizer();
-        recognizer.addListener(this);
-
-        /** In your application you might not need to add all those searches.
-         * They are added here for demonstration. You can leave just one.
-         */
-
-        // Create keyword-activation search.
-        //recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
-        //recognizer.addKeywordSearch(KWS_SEARCH,new File(assetsDir,"book.txt"));
-        
-        // Create grammar-based search for selection between demos
-/*        File menuGrammar = new File(assetsDir, "menu.gram");
-        recognizer.addGrammarSearch(MENU_SEARCH, menuGrammar);*/
-
-        // Create grammar-based search for digit recognition
-        File digitsGrammar = new File(assetsDir, "digits.gram");
-        recognizer.addGrammarSearch(DIGITS_SEARCH, digitsGrammar);
-        
-        // Create language model search
-        //File languageModel = new File(assetsDir, "weather.dmp");
-        //recognizer.addNgramSearch(FORECAST_SEARCH, languageModel);
-        
-        // Phonetic search
-        //File phoneticModel = new File(assetsDir, "en-phone.dmp");
-        //recognizer.addAllphoneSearch(PHONE_SEARCH, phoneticModel);
-    }
 
     @Override
     public void onError(Exception error) {
