@@ -129,12 +129,13 @@ public class MainActivity extends Activity implements
                 .setAcousticModel(new File(assetsDir, "zh"))
                 //.setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
                 .setDictionary(new File(assetsDir, "my.dict"))
+                .setString("lm","my.lm")
 
                 // To disable logging of raw audio comment out this call (takes a lot of space on the device)
                 //.setRawLogDir(assetsDir)
 
                 // Threshold to tune for keyphrase to balance between false alarms and misses
-                .setKeywordThreshold(1e-6f)
+                .setKeywordThreshold(1e-10f)
 
                 // Use context-independent phonetic search, context-dependent is too slow for mobile
                 .setBoolean("-allphone_ci", true)
@@ -145,6 +146,9 @@ public class MainActivity extends Activity implements
         /** In your application you might not need to add all those searches.
          * They are added here for demonstration. You can leave just one.
          */
+
+        //File myGrammar = new File(assetsDir, "my.gram");
+        //recognizer.addGrammarSearch(MENU_SEARCH, myGrammar);
 
         // Create keyword-activation search.
         //recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
@@ -193,7 +197,7 @@ public class MainActivity extends Activity implements
 
         ((TextView) findViewById(R.id.result_text)).setText(text);
         //makeText("onPartialResult : "+text);
-        //Log.d(TAG,"onPartialResult : "+text);
+        Log.e(TAG,"onPartialResult : "+text);
     }
 
     Toast toast;
@@ -212,7 +216,7 @@ public class MainActivity extends Activity implements
         if (hypothesis != null) {
             String text = hypothesis.getHypstr();
             makeText("onResult "+text);
-            Log.d(TAG,"onResult : "+text);
+            Log.e(TAG,"onResult : "+text);
         }
     }
 

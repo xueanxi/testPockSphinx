@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
+import android.widget.Toast;
 
 /**
  * Created by user on 4/11/18.
@@ -17,29 +18,50 @@ import android.support.v4.content.ContextCompat;
 
 public class PermissionActivity extends Activity {
 
-    String p1 = Manifest.permission.RECORD_AUDIO;
-    String p2 = Manifest.permission.READ_EXTERNAL_STORAGE;
-    String p3 = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    String[] permissions = new String[]{
+            Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (ContextCompat.checkSelfPermission(this, p1)
-                != PackageManager.PERMISSION_GRANTED) {
-            // 没有权限，申请权限。
-            requestPermissions(new String[]{p1,p2,p3},1);
-        }else{
-            // 有权限了，去放肆吧。
+        boolean hasPermisssion = true;
+        for(int i =0;i<permissions.length;i++){
+            if(ContextCompat.checkSelfPermission(this, permissions[i]) == PackageManager.PERMISSION_DENIED){
+                hasPermisssion = false;
+            }
+        }
+
+        if(hasPermisssion){
+            Toast.makeText(this,"has permission .",Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this,MainActivity.class));
-            finish();
+        }else{
+            Toast.makeText(this,"no permission .",Toast.LENGTH_SHORT).show();
+            requestPermissions(permissions,1001);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        startActivity(new Intent(this,MainActivity.class));
+        if(requestCode == 1001){
+            boolean isGrant = true;
+            for(int i = 0;i<grantResults.length;i++){
+                if(grantResults[i] != PackageManager.PERMISSION_GRANTED){
+                    isGrant = false;
+                }
+            }
+
+            if(isGrant){
+                startActivity(new Intent(this,MainActivity.class));
+            }else{
+                Toast.makeText(this,"Get permission fail.",Toast.LENGTH_SHORT).show();
+            }
+        }
+
         //finish();
     }
 }
